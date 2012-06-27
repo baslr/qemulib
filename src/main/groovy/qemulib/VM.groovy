@@ -73,16 +73,11 @@ public class VM
 
 	def makeArgs()
 	{
-		VM.makeArgs(this)
-	}
-
-	def private static makeArgs =
-	{ vm ->
 		def result = ''
 
-		vm.cmds.keySet().each
+		this.cmds.keySet().each
 		{
-			result += ' ' + vm.cmds[it]
+			result += ' ' + this.cmds[it]
 		}
 
 		return result
