@@ -38,8 +38,8 @@ public class QemuTests extends GroovyTestCase
 	{
 		def vm = qemu.vm()
 
-		// vm.hda('test_data/tinycore.img').cdrom('test_data/tc.iso')
-		// vm.kernel('test_data/kboot/vmlinuz').initrd('test_data/kboot/tinycore.gz')
+		// vm.hda('data/tinycore.img').cdrom('data/tc.iso')
+		// vm.kernel('data/kboot/vmlinuz').initrd('data/kboot/tinycore.gz')
 
 		// vm.start()
 

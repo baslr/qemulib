@@ -21,11 +21,11 @@ public class QMPTests extends GroovyTestCase
 		def fc = 
 		{
 			def vm = qemu.vm()
-			vm.start()
+			// vm.start()
 		}
 
-		for (i in 1..20)
-			fc()
+		// for (i in 1..20)
+			// fc()
 
 
 	}

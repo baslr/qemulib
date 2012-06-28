@@ -1,25 +1,16 @@
-def h = "localhost"
-def p = 1231
+import groovy.util.GroovyTestSuite
+import junit.textui.TestRunner
 
-def teh = 
-{
-  new Socket(h, p).withStreams 
-  { input, output ->
+import QMPTests
+import QemuTests
+import VMTests
 
-	  output << '{"execute":"fail"}'
+def tSuite = new GroovyTestSuite()
 
-  	// start reading output
-	  Thread.start 
-	  {
-      input.eachLine
-      {
-        println "[resp] ${it}"
-      }
+tSuite.addTestSuite(QemuTests.class)
+tSuite.addTestSuite(VMTests.class)
+tSuite.addTestSuite(QMPTests.class)
 
-    }
+TestRunner.run(tSuite)
 
-  }
 
-}
-
-teh()
