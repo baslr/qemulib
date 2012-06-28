@@ -1,6 +1,3 @@
-package qemulib
-
-import qemulib.VM
 
 public class Qemu
 {

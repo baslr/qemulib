@@ -1,6 +1,6 @@
 import groovy.util.GroovyTestCase
 
-import qemulib.Qemu
+import Qemu
 
 
 public class QemuTests extends GroovyTestCase

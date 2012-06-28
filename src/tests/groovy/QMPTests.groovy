@@ -1,6 +1,7 @@
 import groovy.util.GroovyTestCase
 
-import qemulib.VM
+import VM
+import Qemu
 
 
 public class QMPTests extends GroovyTestCase
@@ -10,7 +11,7 @@ public class QMPTests extends GroovyTestCase
 
 	void setUp()
 	{
-		qemu = new qemulib.Qemu([qemu: 'qemu-system-x86_64'])
+		qemu = new Qemu([qemu: 'qemu-system-x86_64'])
 
 		vm = qemu.vm()
 	}

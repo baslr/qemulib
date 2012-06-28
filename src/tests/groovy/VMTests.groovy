@@ -1,7 +1,7 @@
 import groovy.util.GroovyTestCase
 
-import qemulib.VM
-import qemulib.Qemu
+import VM
+import Qemu
 
 public class VMTests extends GroovyTestCase
 {

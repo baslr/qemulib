@@ -1,8 +1,6 @@
-package qemulib
-
 import groovy.json.JsonBuilder
 
-import qemulib.Qemu
+import Qemu
 
 public class VM 
 {
