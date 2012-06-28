@@ -5,10 +5,11 @@ import qemulib.VM
 public class Qemu
 {
 	def vms = []
-	def qProps = [
+
+	def synchronized qProps = [
 		qemu: "qemu",
 		tcp: true,
-		port: 1231
+		port: 2000
 	]
 
 	Qemu()
@@ -36,13 +37,46 @@ public class Qemu
 
 	def exec(cmd)
 	{
+		// TODO - errneous output not shown till vm quits
+		// def out = new StringBuffer()
+
 		"${qProps.qemu} $cmd".execute().consumeProcessOutput(qLog, qError)
+		// println "${qProps.qemu} $cmd"
+	}
+
+
+	def synchronized start(vm)
+	{
+		// TODO restructure!
+
+		def cmd = vm.makeArgs()
+
+		checkTcp()
+		if (qProps.tcp) 
+			cmd += " -qmp tcp:localhost:${qProps.port},server"
+
+
+		println cmd
+
+		vm.qmp = qProps.port
+		exec(cmd)
+	}
+
+	// find an available port
+	def private checkTcp()
+	{
+		try
+		{
+			def s = new ServerSocket(++qProps.port)
+			s.close()
+		} catch (IOException io) {
+			checkTcp()
+		}
 	}
 
 	def qLog = 
 	{
 		append: 
-			if (it.trim().length() > 0) // squash blank lines
 				println "[log] $it"
 
 	} as Appendable
@@ -51,7 +85,8 @@ public class Qemu
 	def qError = 
 	{
 		append:
-				{ throw new QemuException("[qemu error] $it") }
+				// { throw new QemuException("[qemu error] $it") }
+				println it
 
 	} as Appendable
 

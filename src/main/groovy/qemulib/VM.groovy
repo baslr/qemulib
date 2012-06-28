@@ -11,6 +11,9 @@ public class VM
 	// map of processed command line args
 	def cmds 		= [:]
 
+	// handle to this vm's qmp
+	def qmp
+
 	def drives 	= []
 	def nics		= []
 
@@ -60,6 +63,18 @@ public class VM
 		vectors : null
 	]
 
+	// TODO Valid drive letters depend on the target achitecture. 
+	// map to convenience bootcodes - used in bootOrder 
+	// TODO use with -boot once
+	private static bootCmd =
+	[
+		d 		: ~/c|cd|cdrom/,
+		c 		: ~/disk|hda/,
+		n 		: ~/net|eth|eth0/,
+		l 		: ~/eth1/,
+		o 		: ~/eth2/,
+		p 		: ~/eth3/
+	]
 
 	VM(qemu)
 	{
@@ -68,8 +83,35 @@ public class VM
 
 	def start()
 	{
-		qemu.exec(makeArgs())
+		qemu.start(this)
+		openSocket()
 	}
+
+	def openTries = 0
+	def openSocket =
+	{
+		Thread.start 
+		{
+			try {
+					def s = new Socket('localhost', qmp)
+					s.close()				                            
+
+					capabilities()
+			} catch(IOException e) {
+				if (++openTries == 10)
+				{
+					println "giving up on $qmp"
+					return
+				}
+				println "Failed opening QMP socket, retrying: $qmp"
+				sleep 100
+				openSocket()
+			}	
+		}
+	}
+
+	// create the qmp socket
+
 
 	def makeArgs()
 	{
@@ -86,14 +128,47 @@ public class VM
 	// QMP stuff
 	//
 
+	def qmpSend(data) 
+	{
+		try {
+
+			def s = new Socket('localhost', qmp)
+
+			def ins = s.getOutputStream()
+			ins << data
+			ins.flush()
+
+			s.getInputStream().eachLine()
+			{
+				println "[vm $qmp] $it"
+				return
+			}
+
+			ins.close()
+
+		} catch (IOException io) {
+			println 'Failed writing to QMP socket.'
+		}
+	}
+
 	def json = 
 	{
 		return new JsonBuilder(it).toString()
 	}
 
+	def capabilities =
+	{
+		qmpSend(json([execute: 'qmp_capabilities']))
+
+		[this]
+	}
+
 	def quit =
 	{
-		return json([execute: 'quit'])
+		qmpSend(json([execute: 'quit']))
+
+		qmp.close()
+		[this]
 	}
 
 
@@ -105,11 +180,6 @@ public class VM
 	//
 	// -- End QMP stuff
 
-
-	def boot(params)
-	{
-		// TODO
-	}
 
 	def private cmdput =
 	{ command, arg ->
@@ -137,8 +207,41 @@ public class VM
 	// qemu's user mode networking
 	def net(props)
 	{
-
+		// TODO
 	}
+
+	def boot(props)
+	{
+		def cmd = ''
+
+		props.keySet().each
+		{
+			if (args[it])
+				if (!args[it].matcher(props[it] as String).matches())
+					throw new IllegalArgumentException("boot $it=${props[it]}")
+
+			cmd += "$it=${props[it]},"
+		}
+
+		// strip trailing comma
+		cmd = cmd[0 .. cmd.length()-2]
+
+		cmdput("boot", cmd)
+
+		return this
+	}
+
+	// def bootMenu(bool)
+	// {
+	// 	(bool as Boolean) ? boot([menu: 'on']) : boot([menu: 'off'])
+	// 	return this
+	// }
+
+	// // convenience wrapper for boot order
+	// def bootOrder(props)
+	// {
+
+	// }
 
 	// wrapper for qemu -net nic
 	def nic(props)
@@ -161,6 +264,7 @@ public class VM
 		return this
 	}
 
+	// creates a new drive
 	def drive(props)
 	{
 		def cmd = cmdList.drive + ' '
@@ -213,4 +317,3 @@ public class VM
 	}
 
 }
-

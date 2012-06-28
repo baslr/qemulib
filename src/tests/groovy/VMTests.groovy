@@ -93,9 +93,9 @@ public class VMTests extends GroovyTestCase
 		assert testVM.drives.get(2) == "-drive if=ide,file=s/p"
 	}
 
-	void testQMP()
+	void testBootCmd()
 	{
-		testVM.eject("driveA")
+		testVM.boot([order:'a', menu: 'off'])
+		assert testVM.cmds == ['-boot':'-boot order=a,menu=off']
 	}
-
 }

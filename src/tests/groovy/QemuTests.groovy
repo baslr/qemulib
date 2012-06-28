@@ -43,6 +43,8 @@ public class QemuTests extends GroovyTestCase
 
 		// vm.start()
 
+		// assert vm.cmds.keySet().contains('-qmp')
+
 	}
 
 	void testVMQuit()
