@@ -3,12 +3,12 @@ import junit.textui.TestRunner
 
 import QMPTests
 import QemuTests
-import VMTests
+import MachineTests
 
 def tSuite = new GroovyTestSuite()
 
 tSuite.addTestSuite(QemuTests.class)
-tSuite.addTestSuite(VMTests.class)
+tSuite.addTestSuite(MachineTests.class)
 tSuite.addTestSuite(QMPTests.class)
 
 TestRunner.run(tSuite)

@@ -1,6 +1,6 @@
 import groovy.util.GroovyTestCase
 
-import VM
+import Machine
 import Qemu
 
 

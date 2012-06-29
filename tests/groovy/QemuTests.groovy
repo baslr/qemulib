@@ -12,7 +12,7 @@ public class QemuTests extends GroovyTestCase
 		qemu = new Qemu([qemu: "qemu-system-x86_64"])
 	}
 
-	void testVMDirSanity()
+	void testMachineDirSanity()
 	{
 	}
 
@@ -24,7 +24,7 @@ public class QemuTests extends GroovyTestCase
 		assert qemu1.qProps.qemu == 'qemu'
 	}
 
-	void testVMStoring()
+	void testMachineStoring()
 	{
 
 		def vm = qemu.vm()
@@ -34,7 +34,7 @@ public class QemuTests extends GroovyTestCase
 
 	
 
-	void testVMLaunch()
+	void testMachineLaunch()
 	{
 		def vm = qemu.vm()
 
@@ -47,7 +47,7 @@ public class QemuTests extends GroovyTestCase
 
 	}
 
-	void testVMQuit()
+	void testMachineQuit()
 	{
 
 	}

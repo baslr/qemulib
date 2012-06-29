@@ -2,7 +2,7 @@ import groovy.json.JsonBuilder
 
 import Qemu
 
-public class VM 
+public class Machine 
 {
 	def qemu
 
@@ -74,7 +74,7 @@ public class VM
 		p 		: ~/eth3/
 	]
 
-	VM(qemu)
+	Machine(qemu)
 	{
 		this.qemu = qemu
 	}

@@ -25,7 +25,7 @@ public class Qemu
 	// def vm(props)
 	def vm()
 	{
-		def vm = new VM(this)
+		def vm = new Machine(this)
 
 		vms.push(vm)
 
