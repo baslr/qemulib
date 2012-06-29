@@ -1,9 +1,9 @@
 qemu = require "qemu"
 
 puts = (require "util").puts
-assert = (require "chai").assert
+assert = (require "assert")
 
 
 suite 'Qemu processes', ->
-  test 'qemu startup', ->
-    qemu.vm()
+  test 'qemu querying', ->
+    vm = qemu.vm()
