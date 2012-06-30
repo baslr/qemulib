@@ -8,23 +8,23 @@ suite 'Vm tests', ->
     vm    = qemu.vm()
 
     vm.kernel "vmlinuz"
-    assert.equal vm.cmds.kernel, "-kernel vmlinuz"
+    assert.equal vm.cmds.kernel, "vmlinuz"
 
     vm.append "line"
-    assert.equal vm.make_args(), "-kernel vmlinuz -append line"
+    assert.equal vm.makeArgs().join(' '), "-kernel vmlinuz -append line"
 
     vm.initrd "initrd"
-    assert.equal vm.make_args(), "-kernel vmlinuz -append line -initrd initrd"
+    assert.equal vm.makeArgs().join(' '), "-kernel vmlinuz -append line -initrd initrd"
 
   test 'various drive commands', ->
     vm    = qemu.vm()
 
     vm.hda "hda"
-    assert.equal vm.cmds.hda, "-hda hda"
+    assert.equal vm.cmds.hda, "hda"
 
     vm.hdc "hdc"
     vm.cdrom "cdrom"
     vm.hdd "hdd"
     
-    assert.equal vm.make_args(), "-hda hda -hdc hdc -cdrom cdrom -hdd hdd"
+    assert.equal vm.makeArgs().join(' '), "-hda hda -hdc hdc -cdrom cdrom -hdd hdd"
 

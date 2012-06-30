@@ -18,19 +18,23 @@ cmdlist = {
 
 
 # main object managed here
-vm = ->
+vm = (qemu) ->
+  qemu : qemu
+
   start   : -> 
-    puts "start machine"
-    this
+    this.qemu.start(this)
 
   # internal stuff
   cmds : {}
   cmdput : (cmd, arg) ->
-    this.cmds[cmd] = cmdlist[cmd] + " " + arg
-  make_args : ->
+    argMap = []
+    argMap.push(arg)
+    this.cmds[cmd] = argMap
+  makeArgs : ->
     res = []
-    res.push val for cmd, val of this.cmds
-    res.join(' ')
+    res.push cmdlist[cmd],val for cmd, val of this.cmds
+    
+    res
 
   # kernel related
   kernel  : (file) ->
