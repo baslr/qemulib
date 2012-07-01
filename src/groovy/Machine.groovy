@@ -122,9 +122,7 @@ public class Machine
       result += ' ' + this.cmds[it]
     }
 
-    if (appended)
-      result += ' ' + appended
-
+    if (appended) result += ' ' + appended
 
     return result
   }
