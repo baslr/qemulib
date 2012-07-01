@@ -81,6 +81,12 @@ public class MachineTests extends GroovyTestCase
     shouldFail { vm.drive(["if":"ff"]) }
   }
 
+  void testQAppendExtraArgs()
+  {
+    vm.hda("hda")
+    vm.qAppend("-hdb hh")
+    assert vm.makeArgs() == ' -hda hda -hdb hh'
+  }
   void testDriveArgsSaving()
   {
     vm.drive("if":"virtio")

@@ -1,4 +1,5 @@
 qemu = require "qemu"
+qemu.qProps.qemu = 'qemu-system-x86_64'
 
 assert  = require "assert"
 proc    = require "child_process"
@@ -18,7 +19,7 @@ suite 'Qemu generic', ->
 
     vm.start ->
       vm.quit (resp) ->
-        console.log resp.toString()
+        # console.log resp.toString()
         done()
 
   test 'qmp unix fifo socket'

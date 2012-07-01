@@ -4,7 +4,7 @@ net     = require "net"
 
 qProps = 
 {
-    qemu: "qemu-system-x86_64",
+    qemu: "qemu",
     tcp: true,
     port: 2000
 }

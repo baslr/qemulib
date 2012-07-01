@@ -8,6 +8,7 @@ public class Machine
 
   // map of processed command line args
   def cmds    = [:]
+  def appended = ''
 
   // handle to this vm's qmp
   def qmp
@@ -121,7 +122,16 @@ public class Machine
       result += ' ' + this.cmds[it]
     }
 
+    if (appended)
+      result += ' ' + appended
+
+
     return result
+  }
+
+  def qAppend(line)
+  {
+    appended += line
   }
 
   // QMP stuff

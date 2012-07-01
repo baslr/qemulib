@@ -22,9 +22,10 @@ cmdlist = {
 
 # main object managed here
 vm = (qemu) ->
-  qemu : qemu
+  qemu      : qemu
   # qmp socket loc (tcp or fifo)
-  qmp : null
+  qmp       : null
+  appended  : ''
 
   start   : (cb) ->
     this.qemu.start(this, cb)
@@ -37,8 +38,15 @@ vm = (qemu) ->
     this.cmds[cmd] = argMap
   makeArgs : ->
     res = []
+      # res.push ap for cmd, of this.appended.split(' ')
     res.push cmdlist[cmd],val for cmd, val of this.cmds
+    if (this.appended)
+      res.push this.appended
     res
+  qAppend : (line) ->
+    this.appended += ' ' + line
+
+
 
   # kernel related
   kernel  : (file) ->
