@@ -5,65 +5,65 @@ import Qemu
 
 public class QemuTests extends GroovyTestCase
 {
-	def qemu
+  def qemu
 
-	void setUp()
-	{
-		qemu = new Qemu([qemu: "qemu-system-x86_64"])
-	}
+  void setUp()
+  {
+    qemu = new Qemu([qemu: "qemu-system-x86_64"])
+  }
 
-	void testMachineDirSanity()
-	{
-	}
+  void testMachineDirSanity()
+  {
+  }
 
-	void testProps()
-	{
-		def qemu1 = new Qemu()
+  void testProps()
+  {
+    def qemu1 = new Qemu()
 
-		assert qemu.qProps.qemu == 'qemu-system-x86_64'
-		assert qemu1.qProps.qemu == 'qemu'
-	}
+    assert qemu.qProps.qemu == 'qemu-system-x86_64'
+    assert qemu1.qProps.qemu == 'qemu'
+  }
 
-	void testMachineStoring()
-	{
+  void testMachineStoring()
+  {
 
-		def vm = qemu.vm()
+    def vm = qemu.vm()
 
-		assert(qemu.vms.first() == vm)
-	}
+    assert(qemu.vms.first() == vm)
+  }
 
-	
+  
 
-	void testMachineLaunch()
-	{
-		def vm = qemu.vm()
+  void testMachineLaunch()
+  {
+    def vm = qemu.vm()
 
-		// vm.hda('data/tinycore.img').cdrom('data/tc.iso')
-		// vm.kernel('data/kboot/vmlinuz').initrd('data/kboot/tinycore.gz')
+    // vm.hda('data/tinycore.img').cdrom('data/tc.iso')
+    // vm.kernel('data/kboot/vmlinuz').initrd('data/kboot/tinycore.gz')
 
-		// vm.start()
+    // vm.start()
 
-		// assert vm.cmds.keySet().contains('-qmp')
+    // assert vm.cmds.keySet().contains('-qmp')
 
-	}
+  }
 
-	void testMachineQuit()
-	{
+  void testMachineQuit()
+  {
 
-	}
+  }
 
-	// should override exception thats thrown in default qemulib
-	void testOverrideLogging()
-	{
-		// def vm = qemu.vm()
+  // should override exception thats thrown in default qemulib
+  void testOverrideLogging()
+  {
+    // def vm = qemu.vm()
 
-		// shouldFail { qemu.exec('-append f')  }
-		// qemu.metaClass.qError =
-		// {
-		// 	append: {println "wnnar"}
-		// } as Appendable
+    // shouldFail { qemu.exec('-append f')  }
+    // qemu.metaClass.qError =
+    // {
+    //  append: {println "wnnar"}
+    // } as Appendable
 
-		// qemu.exec('-append f') 
+    // qemu.exec('-append f') 
 
-	}
+  }
 }
