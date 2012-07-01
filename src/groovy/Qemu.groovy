@@ -51,9 +51,6 @@ public class Qemu
     if (qProps.tcp) 
       cmd += " -qmp tcp:localhost:${qProps.port},server"
 
-
-    println cmd
-
     vm.qmp = qProps.port
     exec(cmd)
   }
@@ -81,8 +78,7 @@ public class Qemu
   def qError = 
   {
     append:
-        // { throw new QemuException("[qemu error] $it") }
-        println it
+        { throw new QemuException("[qemu error] $it") }
 
   } as Appendable
 

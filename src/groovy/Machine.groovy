@@ -95,8 +95,6 @@ public class Machine
       try {
           def s = new Socket('localhost', qmp)
           s.close()                                   
-
-          capabilities()
       } catch(IOException e) {
         if (++openTries == 10)
         {
@@ -142,6 +140,7 @@ public class Machine
       def s = new Socket('localhost', qmp)
 
       def ins = s.getOutputStream()
+      ins << json([execute: 'qmp_capabilities'])
       ins << data
       ins.flush()
 
@@ -163,18 +162,9 @@ public class Machine
     return new JsonBuilder(it).toString()
   }
 
-  def capabilities =
-  {
-    qmpSend(json([execute: 'qmp_capabilities']))
-
-    [this]
-  }
-
   def quit =
   {
     qmpSend(json([execute: 'quit']))
-
-    qmp.close()
     [this]
   }
 

@@ -49,21 +49,10 @@ public class QemuTests extends GroovyTestCase
 
   void testMachineQuit()
   {
-
+    def vm = qemu.vm()
+    vm.start()
+    vm.quit()
   }
 
-  // should override exception thats thrown in default qemulib
-  void testOverrideLogging()
-  {
-    // def vm = qemu.vm()
 
-    // shouldFail { qemu.exec('-append f')  }
-    // qemu.metaClass.qError =
-    // {
-    //  append: {println "wnnar"}
-    // } as Appendable
-
-    // qemu.exec('-append f') 
-
-  }
 }
