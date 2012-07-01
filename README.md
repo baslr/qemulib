@@ -36,13 +36,13 @@ Most commands return the created machine object so they can be chained.
 
 Qemu has two ways to communicate and pass events - tcp or a unix domain socket. They are passed on startup and cannot be changed. TCP is the default and the library will try and handle that smoothly. Each `qemu` implementation has a `qPops` map that allows tweaking:
 
-```json
-  qProps = {
+```groovy
+  qProps = [
     qemu: "qemu-system-x86_64",   // override the qemu executable here
     tcp: true,      // use tcp internally (recommended)
                     // alternative is to use domain sockets.
     port: 2000                    // starting port
-  }
+  ]
 ```
 
 The `port` variable will be incremented until an open port is found. Setting TCP to false there will switch to creating fifos instead (not implemented, see below). To use domain sockets in java the excellent JUDS library will be required. 
