@@ -6,9 +6,9 @@ Qemulib: library to control qemu for groovy and nodejs
 The main goal was to have a consistent, simple api to use qemu. Here is the result:
 
 ```javascript
-  qemu  = require('qemu')
+  var qemu  = require('qemu')
 
-  vm    = qemu.vm()
+  var vm    = qemu.vm()
   vm.hda("data/disk.img")
   vm.kernel("data/vmlinuz").initrd("data/initrd")
 
@@ -23,8 +23,7 @@ and using groovy:
   def qemu  = new Qemu()
   def vm    = qemu.vm()
 
-  vm.hda("data/disk.img").kernel("data/vmlinuz")
-  vm.initrd("data/initrd")
+  vm.hda("data/disk.img").kernel("data/vmlinuz").initrd("data/initrd")
 
   vm.start()
 ```
