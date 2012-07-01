@@ -15,7 +15,6 @@ suite 'Vm tests', ->
 
     vm.initrd "initrd"
     assert.equal vm.makeArgs().join(' '), "-kernel vmlinuz -append line -initrd initrd"
-
   test 'various drive commands', ->
     vm    = qemu.vm()
 
@@ -25,6 +24,5 @@ suite 'Vm tests', ->
     vm.hdc "hdc"
     vm.cdrom "cdrom"
     vm.hdd "hdd"
-    
     assert.equal vm.makeArgs().join(' '), "-hda hda -hdc hdc -cdrom cdrom -hdd hdd"
 

@@ -1,28 +1,33 @@
-puts = (require "util").puts
+# abstracts a virtual machine - use qemu.vm() to create
+# a new vm rather than using this directly, otherwise
+# the qemu ref wont be set. you can set it manually of course
+
+net = require 'net'
 
 cmdlist = {
-  boot    : "-boot",
-  drive   : "-drive",
-  kernel  : "-kernel",
-  append  : "-append",
-  initrd  : "-initrd",
-  cdrom   : "-cdrom",
-  hda     : "-hda",
-  hdb     : "-hdb",
-  hdc     : "-hdc",
-  hdd     : "-hdd",
-  nic     : "-net nic,",
-  net     : "-net user,"
+    boot    : "-boot",
+    drive   : "-drive",
+    kernel  : "-kernel",
+    append  : "-append",
+    initrd  : "-initrd",
+    cdrom   : "-cdrom",
+    hda     : "-hda",
+    hdb     : "-hdb",
+    hdc     : "-hdc",
+    hdd     : "-hdd",
+    nic     : "-net nic,",
+    net     : "-net user,"
 }
-
 
 
 # main object managed here
 vm = (qemu) ->
   qemu : qemu
+  # qmp socket loc (tcp or fifo)
+  qmp : null
 
-  start   : -> 
-    this.qemu.start(this)
+  start   : (cb) ->
+    this.qemu.start(this, cb)
 
   # internal stuff
   cmds : {}
@@ -33,13 +38,12 @@ vm = (qemu) ->
   makeArgs : ->
     res = []
     res.push cmdlist[cmd],val for cmd, val of this.cmds
-    
     res
 
   # kernel related
   kernel  : (file) ->
     this.cmdput 'kernel', file
-    this 
+    this
   append  : (line) ->
     this.cmdput 'append', line
     this
@@ -62,8 +66,22 @@ vm = (qemu) ->
     this
   cdrom : (file) ->
     this.cmdput 'cdrom', file
-    this
 
+  # qmp commands
+  qmpSend : (data, callback) ->
+    socket = net.connect({port: this.qmp})
+    qemuOutput = null
+    socket.on 'connect', ->
+      socket.write('{"execute":"qmp_capabilities"}')
+      socket.write(data)
+
+    socket.on 'data', (resp) ->
+      socket.end()
+      qemuOutput = resp
+    socket.on 'end', ->
+      callback(qemuOutput)
+  quit : (callback) ->
+    this.qmpSend('{"execute":"quit"}', callback)
 
   drives  : []
   nics    : []

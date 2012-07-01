@@ -1,22 +1,25 @@
 qemu = require "qemu"
 
-puts    = (require "util").puts
-assert  = (require "assert")
+assert  = require "assert"
 proc    = require "child_process"
-
 
 suite 'Qemu generic', ->
   test 'qemu querying', ->
     vm = qemu.vm()
-    # vm.hda("data/hda.img").kernel("d/vmlinuz").initrd("d/initrd")
-    # vm.start()
-  # test 'trying tcp port', (done) -> 
+    vm.hda("data/hda.img").kernel("d/vmlinuz").initrd("d/initrd")
+    # vm.start ->
+    #   console.log "started"
+    #   done()
+  # test 'trying tcp port', (done) ->
   #   qemu.checkTcp()
   #   done()
-  test 'qmp tcp socket', ->
+  test 'qmp tcp socket', (done) ->
     vm = qemu.vm()
-    vm.start()
+
+    vm.start ->
+      vm.quit (resp) ->
+        console.log resp.toString()
+        done()
+
   test 'qmp unix fifo socket'
   test 'json commands'
-
-
