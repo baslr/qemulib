@@ -1,9 +1,9 @@
-Qemulib: library to control qemu for groovy and nodejs
+Library to control qemu for groovy and nodejs
 ===
 
 ### Overview
 
-The main goal was to have a consistent, simple api to use qemu. Here is the result:
+The main goal was to have a consistent, simple api to launch virtual machines and control qemu. Here is the result:
 
 ```javascript
   qemu  = require('qemu')
@@ -34,7 +34,7 @@ Most commands return the created machine object so they can be chained.
 
 ### Details
 
-Qemu has two ways to communicate and pass events - tcp or a unix domain socket. They are passed on startup and cannot be changed. TCP is the default and the library will try and handle that smoothly. Each `qemu` implementation has a `qPops` map that allows tweaking:
+Qemu has two ways to communicate and pass events - tcp or a unix domain socket. They are passed on startup and cannot be changed once the vm is running. TCP is the default and the library will try and handle that smoothly. Each `qemu` implementation has a `qPops` map that allows tweaking:
 
 ```groovy
   qProps = [
@@ -54,4 +54,4 @@ Probably the order in which they will be completed:
 - Unix domain socket support
 - Event handling 
 - Full implementation of qemu's startup commands
-  use the qAppend("-serial fff etc") function in each library to add the more obscure switches as you may need them. 
+  . Use the qAppend("-serial fff etc") function in each library to add the more obscure switches as you may need them. 

@@ -4,314 +4,315 @@ import Qemu
 
 public class Machine 
 {
-	def qemu
+  def qemu
 
-	// map of processed command line args
-	def cmds 		= [:]
+  // map of processed command line args
+  def cmds    = [:]
 
-	// handle to this vm's qmp
-	def qmp
+  // handle to this vm's qmp
+  def qmp
 
-	def drives 	= []
-	def nics		= []
+  def drives  = []
+  def nics    = []
+  
 
-	private static final cmdList = 
-	[
-		boot		: "-boot",
-		drive 	: "-drive",
-		kernel	: "-kernel",
-		append	: "-append",
-		initrd	: "-initrd",
-		cdrom		: "-cdrom",
-		hda   	: "-hda",
-		hdb			: "-hdb",
-		hdc			: "-hdc",
-		hdd			: "-hdd",
-		nic			: "-net nic,",
-		net 	  : "-net user,"
-	]
+  private static final cmdList = 
+  [
+    boot    : "-boot",
+    drive   : "-drive",
+    kernel  : "-kernel",
+    append  : "-append",
+    initrd  : "-initrd",
+    cdrom   : "-cdrom",
+    hda     : "-hda",
+    hdb     : "-hdb",
+    hdc     : "-hdc",
+    hdd     : "-hdd",
+    nic     : "-net nic,",
+    net     : "-net user,"
+  ]
 
-	private static final args = 
-	[
-		// -boot
-		order		: ~/[a-p]/,
-		once		: ~/[a-p]/,
-		menu		: ~/on|off/,
+  private static final args = 
+  [
+    // -boot
+    order   : ~/[a-p]/,
+    once    : ~/[a-p]/,
+    menu    : ~/on|off/,
 
-		// -drive
-		// TODO ‘cyls=c,heads=h,secs=s[,trans=t]’
-		file		: null,
-		'if'		: ~/ide|scsi|sd|mtd|floppy|pflash|virtio/,
-		bus			: null,
-		nit		: null,
-		index		: null,
-		media		: ~/disk|cdrom/,
-		snapshot: ~/on|off/,
-		cache		: ~/none|writeback|writetrough/,
-		aio			: ~/threads|native/,
-		serial	: null,
+    // -drive
+    // TODO ‘cyls=c,heads=h,secs=s[,trans=t]’
+    file    : null,
+    'if'    : ~/ide|scsi|sd|mtd|floppy|pflash|virtio/,
+    bus     : null,
+    nit   : null,
+    index   : null,
+    media   : ~/disk|cdrom/,
+    snapshot: ~/on|off/,
+    cache   : ~/none|writeback|writetrough/,
+    aio     : ~/threads|native/,
+    serial  : null,
 
-		// networking 
-		name		: null, // device name in monitor commands
-		addr		: null, // device addr for PCI cards only
-		net 		: null,
-		vlan		: ~/[0-9]+/,
-		macaddr	: null,
-		model		: ~/virtio|i82551|i82557b|i82559er|ne2k_pci|ne2k_isa|pcnet|rtl8139|e1000|smc91c111|lance|mcf_fec/,
-		vectors : null
-	]
+    // networking 
+    name    : null, // device name in monitor commands
+    addr    : null, // device addr for PCI cards only
+    net     : null,
+    vlan    : ~/[0-9]+/,
+    macaddr : null,
+    model   : ~/virtio|i82551|i82557b|i82559er|ne2k_pci|ne2k_isa|pcnet|rtl8139|e1000|smc91c111|lance|mcf_fec/,
+    vectors : null
+  ]
 
-	// TODO Valid drive letters depend on the target achitecture. 
-	// map to convenience bootcodes - used in bootOrder 
-	// TODO use with -boot once
-	private static bootCmd =
-	[
-		d 		: ~/c|cd|cdrom/,
-		c 		: ~/disk|hda/,
-		n 		: ~/net|eth|eth0/,
-		l 		: ~/eth1/,
-		o 		: ~/eth2/,
-		p 		: ~/eth3/
-	]
+  // TODO Valid drive letters depend on the target achitecture. 
+  // map to convenience bootcodes - used in bootOrder 
+  // TODO use with -boot once
+  private static bootCmd =
+  [
+    d     : ~/c|cd|cdrom/,
+    c     : ~/disk|hda/,
+    n     : ~/net|eth|eth0/,
+    l     : ~/eth1/,
+    o     : ~/eth2/,
+    p     : ~/eth3/
+  ]
 
-	Machine(qemu)
-	{
-		this.qemu = qemu
-	}
+  Machine(qemu)
+  {
+    this.qemu = qemu
+  }
 
-	def start()
-	{
-		qemu.start(this)
-		openSocket()
-	}
+  def start()
+  {
+    qemu.start(this)
+    openSocket()
+  }
 
-	def openTries = 0
-	def openSocket =
-	{
-		Thread.start 
-		{
-			try {
-					def s = new Socket('localhost', qmp)
-					s.close()				                            
+  def openTries = 0
+  def openSocket =
+  {
+    Thread.start 
+    {
+      try {
+          def s = new Socket('localhost', qmp)
+          s.close()                                   
 
-					capabilities()
-			} catch(IOException e) {
-				if (++openTries == 10)
-				{
-					println "giving up on $qmp"
-					return
-				}
-				println "Failed opening QMP socket, retrying: $qmp"
-				sleep 100
-				openSocket()
-			}	
-		}
-	}
+          capabilities()
+      } catch(IOException e) {
+        if (++openTries == 10)
+        {
+          println "giving up on $qmp"
+          return
+        }
+        println "Failed opening QMP socket, retrying: $qmp"
+        sleep 100
+        openSocket()
+      } 
+    }
+  }
 
-	// create the qmp socket
-
-
-	def makeArgs()
-	{
-		def result = ''
-
-		this.cmds.keySet().each
-		{
-			result += ' ' + this.cmds[it]
-		}
-
-		return result
-	}
-
-	// QMP stuff
-	//
-
-	def qmpSend(data) 
-	{
-		try {
-
-			def s = new Socket('localhost', qmp)
-
-			def ins = s.getOutputStream()
-			ins << data
-			ins.flush()
-
-			s.getInputStream().eachLine()
-			{
-				println "[vm $qmp] $it"
-				return
-			}
-
-			ins.close()
-
-		} catch (IOException io) {
-			println 'Failed writing to QMP socket.'
-		}
-	}
-
-	def json = 
-	{
-		return new JsonBuilder(it).toString()
-	}
-
-	def capabilities =
-	{
-		qmpSend(json([execute: 'qmp_capabilities']))
-
-		[this]
-	}
-
-	def quit =
-	{
-		qmpSend(json([execute: 'quit']))
-
-		qmp.close()
-		[this]
-	}
+  // create the qmp socket
 
 
-	def eject =
-	{ dev ->
-		return json([execute: 'eject', arguments: ['device': dev]])
-	}
+  def makeArgs()
+  {
+    def result = ''
 
-	//
-	// -- End QMP stuff
+    this.cmds.keySet().each
+    {
+      result += ' ' + this.cmds[it]
+    }
+
+    return result
+  }
+
+  // QMP stuff
+  //
+
+  def qmpSend(data) 
+  {
+    try {
+
+      def s = new Socket('localhost', qmp)
+
+      def ins = s.getOutputStream()
+      ins << data
+      ins.flush()
+
+      s.getInputStream().eachLine()
+      {
+        println "[vm $qmp] $it"
+        return
+      }
+
+      ins.close()
+
+    } catch (IOException io) {
+      println 'Failed writing to QMP socket.'
+    }
+  }
+
+  def json = 
+  {
+    return new JsonBuilder(it).toString()
+  }
+
+  def capabilities =
+  {
+    qmpSend(json([execute: 'qmp_capabilities']))
+
+    [this]
+  }
+
+  def quit =
+  {
+    qmpSend(json([execute: 'quit']))
+
+    qmp.close()
+    [this]
+  }
 
 
-	def private cmdput =
-	{ command, arg ->
-		cmds.put(cmdList[command], cmdList[command] + " $arg")
-	}
+  def eject =
+  { dev ->
+    return json([execute: 'eject', arguments: ['device': dev]])
+  }
 
-	def kernel(file)
-	{
-		cmdput("kernel", file)
-		return this
-	}
+  //
+  // -- End QMP stuff
 
-	def append(line)
-	{
-		cmdput("append", line)
-		return this
-	}
 
-	def initrd(file)
-	{
-		cmdput("initrd", file)
-		return this
-	}
+  def private cmdput =
+  { command, arg ->
+    cmds.put(cmdList[command], cmdList[command] + " $arg")
+  }
 
-	// qemu's user mode networking
-	def net(props)
-	{
-		// TODO
-	}
+  def kernel(file)
+  {
+    cmdput("kernel", file)
+    return this
+  }
 
-	def boot(props)
-	{
-		def cmd = ''
+  def append(line)
+  {
+    cmdput("append", line)
+    return this
+  }
 
-		props.keySet().each
-		{
-			if (args[it])
-				if (!args[it].matcher(props[it] as String).matches())
-					throw new IllegalArgumentException("boot $it=${props[it]}")
+  def initrd(file)
+  {
+    cmdput("initrd", file)
+    return this
+  }
 
-			cmd += "$it=${props[it]},"
-		}
+  // qemu's user mode networking
+  def net(props)
+  {
+    // TODO
+  }
 
-		// strip trailing comma
-		cmd = cmd[0 .. cmd.length()-2]
+  def boot(props)
+  {
+    def cmd = ''
 
-		cmdput("boot", cmd)
+    props.keySet().each
+    {
+      if (args[it])
+        if (!args[it].matcher(props[it] as String).matches())
+          throw new IllegalArgumentException("boot $it=${props[it]}")
 
-		return this
-	}
+      cmd += "$it=${props[it]},"
+    }
 
-	// def bootMenu(bool)
-	// {
-	// 	(bool as Boolean) ? boot([menu: 'on']) : boot([menu: 'off'])
-	// 	return this
-	// }
+    // strip trailing comma
+    cmd = cmd[0 .. cmd.length()-2]
 
-	// // convenience wrapper for boot order
-	// def bootOrder(props)
-	// {
+    cmdput("boot", cmd)
 
-	// }
+    return this
+  }
 
-	// wrapper for qemu -net nic
-	def nic(props)
-	{
-		def cmd = cmdList.nic
+  // def bootMenu(bool)
+  // {
+  //  (bool as Boolean) ? boot([menu: 'on']) : boot([menu: 'off'])
+  //  return this
+  // }
 
-		props.keySet().each
-		{
-			if (args[it])
-				if (!args[it].matcher(props[it] as String).matches())
-					throw new IllegalArgumentException("$cmd ${props[it]}")
+  // // convenience wrapper for boot order
+  // def bootOrder(props)
+  // {
 
-			cmd += "$it=${props[it]},"
-		}
+  // }
 
-		// strip trailing comma
-		cmd = cmd[0 .. cmd.length()-2]
+  // wrapper for qemu -net nic
+  def nic(props)
+  {
+    def cmd = cmdList.nic
 
-		nics.push(cmd)
-		return this
-	}
+    props.keySet().each
+    {
+      if (args[it])
+        if (!args[it].matcher(props[it] as String).matches())
+          throw new IllegalArgumentException("$cmd ${props[it]}")
 
-	// creates a new drive
-	def drive(props)
-	{
-		def cmd = cmdList.drive + ' '
+      cmd += "$it=${props[it]},"
+    }
 
-		props.keySet().each
-		{
-			if (args[it])
-				if (!args[it].matcher(props[it]).matches())
-					throw new IllegalArgumentException("$cmd ${props[it]} Invalid")
+    // strip trailing comma
+    cmd = cmd[0 .. cmd.length()-2]
 
-			cmd += "$it=${props[it]},"
-		}
+    nics.push(cmd)
+    return this
+  }
 
-		// strip trailing comma
-		cmd = cmd[0 .. cmd.length()-2]
+  // creates a new drive
+  def drive(props)
+  {
+    def cmd = cmdList.drive + ' '
 
-		drives.push(cmd)
+    props.keySet().each
+    {
+      if (args[it])
+        if (!args[it].matcher(props[it]).matches())
+          throw new IllegalArgumentException("$cmd ${props[it]} Invalid")
 
-		return this
-	}
+      cmd += "$it=${props[it]},"
+    }
 
-	def cdrom(file)
-	{
-		cmdput("cdrom", file)
-		return this
-	}
+    // strip trailing comma
+    cmd = cmd[0 .. cmd.length()-2]
 
-	def hda(file)
-	{
-		cmdput("hda", file)
-		return this
-	}
+    drives.push(cmd)
 
-	def hdb(file)
-	{
-		cmdput("hdb", file)
-		return this
-	}
+    return this
+  }
 
-	def hdc(file)
-	{
-		cmdput("hdc", file)
-		return this
-	}
+  def cdrom(file)
+  {
+    cmdput("cdrom", file)
+    return this
+  }
 
-	def hdd(file)
-	{
-		cmdput("hdd", file)
-		return this
-	}
+  def hda(file)
+  {
+    cmdput("hda", file)
+    return this
+  }
+
+  def hdb(file)
+  {
+    cmdput("hdb", file)
+    return this
+  }
+
+  def hdc(file)
+  {
+    cmdput("hdc", file)
+    return this
+  }
+
+  def hdd(file)
+  {
+    cmdput("hdd", file)
+    return this
+  }
 
 }
