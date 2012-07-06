@@ -5,6 +5,17 @@ Library to control qemu for groovy and nodejs
 
 The main goal was to have a consistent, simple api to launch virtual machines and control qemu. Here is the result:
 
+```groovy
+  def qemu  = new Qemu()
+  def vm    = qemu.vm()
+
+  vm.hda("data/disk.img").kernel("data/vmlinuz").initrd("data/initrd")
+
+  vm.start()
+
+  vm.quit()
+```
+and using node.js
 ```javascript
   var qemu  = require('qemu')
 
@@ -22,17 +33,7 @@ The main goal was to have a consistent, simple api to launch virtual machines an
 
 ```
 
-and using groovy:
-```groovy
-  def qemu  = new Qemu()
-  def vm    = qemu.vm()
 
-  vm.hda("data/disk.img").kernel("data/vmlinuz").initrd("data/initrd")
-
-  vm.start()
-
-  vm.quit()
-```
 
 Most functions return the created machine object so they can be chained as shown above. The language bindings are independent of one another - you dont need the groovy source when using nodejs and vice versa.
 
