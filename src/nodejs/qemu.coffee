@@ -21,7 +21,7 @@ start = (vm, callback) ->
     args = vm.makeArgs()
     vm.qmp = port
     args.push "-qmp"
-    args.push "tcp:localhost:" + port + ",server"
+    args.push "tcp:localhost:#{port},server"
     proc.spawn qProps.qemu, args, {stdio: 'inherit', detached: true}
     
   # bunch of extra code just to open the
